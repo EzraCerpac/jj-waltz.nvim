@@ -1,0 +1,119 @@
+*jj-waltz.nvim.txt*  Neovim integration for jj-waltz
+
+==============================================================================
+CONTENTS                                                    *jj-waltz-contents*
+
+1. Introduction ............................................. |jj-waltz-intro|
+2. Requirements ....................................... |jj-waltz-requirements|
+3. Setup ..................................................... |jj-waltz-setup|
+4. Commands ............................................... |jj-waltz-commands|
+5. Configuration ................................... |jj-waltz-configuration|
+
+==============================================================================
+INTRODUCTION                                                   *jj-waltz-intro*
+
+jj-waltz.nvim wraps the `jw` CLI from jj-waltz and exposes workspace actions
+inside Neovim without extra runtime dependencies.
+
+The plugin uses `jw switch --print-path` to mirror shell-driven switch
+behavior. On a successful switch it changes Neovim's cwd to the target path and
+tries to reopen the current buffer in the destination workspace.
+
+==============================================================================
+REQUIREMENTS                                             *jj-waltz-requirements*
+
+- Neovim 0.10 or newer
+- A `jw` binary with `links` subcommands and `switch --print-path`
+
+Use jj-waltz 0.1.5 or newer, or a local build from the jj-waltz repo.
+
+==============================================================================
+SETUP                                                         *jj-waltz-setup*
+
+Example with lazy.nvim:
+
+>
+  {
+    "EzraCerpac/jj-waltz.nvim",
+    main = "jj-waltz",
+    cmd = {
+      "JwPick",
+      "JwSwitch",
+      "JwCurrent",
+      "JwRoot",
+      "JwPath",
+      "JwRemove",
+      "JwRemoveKeepDir",
+      "JwPrune",
+      "JwLinksApply",
+      "JwLinksRepair",
+    },
+    opts = {
+      jw_cmd = "~/.local/bin/jw",
+    },
+    keys = {
+      { "<leader>jw", "<cmd>JwPick<cr>", desc = "jj-waltz picker" },
+    },
+  }
+<
+
+==============================================================================
+COMMANDS                                                   *jj-waltz-commands*
+
+:JwPick
+  Open the workspace picker.
+
+:JwSwitch {name}
+  Switch to or create a workspace and retarget Neovim to the resulting path.
+
+:JwCurrent
+  Show the current workspace name.
+
+:JwRoot
+  Show the current workspace root.
+
+:JwPath {name}
+  Show the resolved path for a workspace token or name.
+
+:JwRemove [name]
+  Forget a workspace. When {name} is omitted, `jw remove` defaults to the
+  current workspace.
+
+:JwRemoveKeepDir [name]
+  Forget a workspace but keep its directory in place.
+
+:JwPrune
+  Forget missing workspaces.
+
+:JwLinksApply
+  Run `jw links apply`.
+
+:JwLinksRepair
+  Run `jw links repair`.
+
+==============================================================================
+CONFIGURATION                                         *jj-waltz-configuration*
+
+`require("jj-waltz").setup({ opts })`
+
+Supported options:
+
+`jw_cmd`
+  String executable path or argv table. Default: `"jw"`.
+
+`picker`
+  Picker backend. v0.1 uses `"vim_ui_select"`.
+
+`switch_behavior`
+  Default: `"retarget"`.
+
+`open_strategy`
+  Default: `"cwd"`.
+
+`notify`
+  Whether to surface command results through |vim.notify()|. Default: `true`.
+
+`keymaps`
+  When `true`, set a default `<leader>jw` picker mapping. Default: `false`.
+
+vim:tw=78:ts=8:noet:ft=help:norl:
