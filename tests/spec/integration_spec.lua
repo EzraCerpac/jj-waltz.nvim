@@ -1,4 +1,4 @@
-local support = require("tests.support")
+local support = require('tests.support')
 
 local M = {}
 
@@ -42,7 +42,7 @@ end
 
 local function setup_plugin(mock_command)
   support.reset_state()
-  require("jj-waltz").setup({
+  require('jj-waltz').setup({
     jw_cmd = mock_command,
     notify = true,
   })
@@ -56,15 +56,18 @@ function M.test_switch_retargets_cwd_and_reopens_current_buffer()
   })
 
   setup_plugin(mock.command)
-  vim.cmd.cd(vim.fn.fnameescape(support.join(mock.root, "src")))
-  vim.cmd.edit(vim.fn.fnameescape(support.join(mock.root, "src", "main.lua")))
+  vim.cmd.cd(vim.fn.fnameescape(support.join(mock.root, 'src')))
+  vim.cmd.edit(vim.fn.fnameescape(support.join(mock.root, 'src', 'main.lua')))
 
   with_notify_capture(function()
-    vim.cmd("JwSwitch feature-a")
+    vim.cmd('JwSwitch feature-a')
   end)
 
-  support.assert_path_eq(vim.fn.getcwd(), support.join(mock.feature_root, "src"))
-  support.assert_path_eq(vim.api.nvim_buf_get_name(0), support.join(mock.feature_root, "src", "main.lua"))
+  support.assert_path_eq(vim.fn.getcwd(), support.join(mock.feature_root, 'src'))
+  support.assert_path_eq(
+    vim.api.nvim_buf_get_name(0),
+    support.join(mock.feature_root, 'src', 'main.lua')
+  )
 end
 
 function M.test_switch_falls_back_to_workspace_root_when_subdir_missing()
@@ -74,19 +77,19 @@ function M.test_switch_falls_back_to_workspace_root_when_subdir_missing()
     with_current_file = false,
   })
 
-  vim.fn.mkdir(support.join(mock.root, "docs"), "p")
-  support.write(support.join(mock.root, "docs", "note.txt"), { "default" })
+  vim.fn.mkdir(support.join(mock.root, 'docs'), 'p')
+  support.write(support.join(mock.root, 'docs', 'note.txt'), { 'default' })
 
   setup_plugin(mock.command)
-  vim.cmd.cd(vim.fn.fnameescape(support.join(mock.root, "docs")))
-  vim.cmd.edit(vim.fn.fnameescape(support.join(mock.root, "docs", "note.txt")))
+  vim.cmd.cd(vim.fn.fnameescape(support.join(mock.root, 'docs')))
+  vim.cmd.edit(vim.fn.fnameescape(support.join(mock.root, 'docs', 'note.txt')))
 
   with_notify_capture(function()
-    vim.cmd("JwSwitch feature-a")
+    vim.cmd('JwSwitch feature-a')
   end)
 
   support.assert_path_eq(vim.fn.getcwd(), mock.feature_root)
-  support.assert_path_eq(vim.api.nvim_buf_get_name(0), support.join(mock.root, "docs", "note.txt"))
+  support.assert_path_eq(vim.api.nvim_buf_get_name(0), support.join(mock.root, 'docs', 'note.txt'))
 end
 
 function M.test_picker_selection_uses_switch_flow()
@@ -101,16 +104,16 @@ function M.test_picker_selection_uses_switch_flow()
   with_ui_overrides({
     select = function(items, _, on_choice)
       for _, item in ipairs(items) do
-        if item.kind == "workspace" and item.target == "feature-a" then
+        if item.kind == 'workspace' and item.target == 'feature-a' then
           on_choice(item, 1)
           return
         end
       end
-      error("feature-a picker item not found")
+      error('feature-a picker item not found')
     end,
   }, function()
     with_notify_capture(function()
-      vim.cmd("JwPick")
+      vim.cmd('JwPick')
     end)
   end)
 
@@ -132,10 +135,10 @@ function M.test_link_conflict_offers_follow_up_actions()
     end,
   }, function()
     with_notify_capture(function(messages)
-      vim.cmd("JwSwitch feature-a")
+      vim.cmd('JwSwitch feature-a')
       local saw_conflict = false
       for _, entry in ipairs(messages) do
-        if entry.message:find("Workspace links are blocking the switch", 1, true) then
+        if entry.message:find('Workspace links are blocking the switch', 1, true) then
           saw_conflict = true
           break
         end
@@ -145,7 +148,10 @@ function M.test_link_conflict_offers_follow_up_actions()
   end)
 
   local log = support.read(mock.log)
-  support.assert_truthy(log:find("links repair", 1, true), "expected follow-up repair action to run")
+  support.assert_truthy(
+    log:find('links repair', 1, true),
+    'expected follow-up repair action to run'
+  )
 end
 
 function M.test_explicit_links_repair_command_succeeds()
@@ -156,8 +162,8 @@ function M.test_explicit_links_repair_command_succeeds()
   vim.cmd.cd(vim.fn.fnameescape(mock.root))
 
   with_notify_capture(function(messages)
-    vim.cmd("JwLinksRepair")
-    support.assert_truthy(messages[#messages].message:find("Links: 1 repaired", 1, true))
+    vim.cmd('JwLinksRepair')
+    support.assert_truthy(messages[#messages].message:find('Links: 1 repaired', 1, true))
   end)
 end
 

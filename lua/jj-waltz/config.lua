@@ -1,10 +1,10 @@
 local M = {}
 
 local defaults = {
-  jw_cmd = "jw",
-  picker = "vim_ui_select",
-  switch_behavior = "retarget",
-  open_strategy = "cwd",
+  jw_cmd = 'jw',
+  picker = 'vim_ui_select',
+  switch_behavior = 'retarget',
+  open_strategy = 'cwd',
   notify = true,
   keymaps = false,
 }
@@ -20,7 +20,7 @@ function M.get()
 end
 
 function M.setup(opts)
-  state = vim.tbl_deep_extend("force", vim.deepcopy(defaults), opts or {})
+  state = vim.tbl_deep_extend('force', vim.deepcopy(defaults), opts or {})
   return state
 end
 

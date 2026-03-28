@@ -4,7 +4,7 @@ local sep = package.config:sub(1, 1)
 local unpack_fn = table.unpack or unpack
 
 function M.trim(value)
-  return (value or ""):gsub("^%s+", ""):gsub("%s+$", "")
+  return (value or ''):gsub('^%s+', ''):gsub('%s+$', '')
 end
 
 function M.join(...)
@@ -17,7 +17,7 @@ function M.join(...)
 end
 
 function M.normalize(path)
-  if not path or path == "" then
+  if not path or path == '' then
     return path
   end
 
@@ -40,7 +40,7 @@ function M.is_descendant(path, root)
   end
 
   local prefix = root
-  if not prefix:match(sep .. "$") then
+  if not prefix:match(sep .. '$') then
     prefix = prefix .. sep
   end
 
@@ -55,11 +55,11 @@ function M.relative_to(path, root)
   end
 
   if path == root then
-    return ""
+    return ''
   end
 
   local prefix = root
-  if not prefix:match(sep .. "$") then
+  if not prefix:match(sep .. '$') then
     prefix = prefix .. sep
   end
 
@@ -72,7 +72,7 @@ end
 
 function M.notify(message, level, opts)
   opts = opts or {}
-  local title = opts.title or "jj-waltz.nvim"
+  local title = opts.title or 'jj-waltz.nvim'
   if opts.enabled == false then
     return
   end
@@ -80,7 +80,7 @@ function M.notify(message, level, opts)
 end
 
 function M.command_string(command)
-  return table.concat(command, " ")
+  return table.concat(command, ' ')
 end
 
 return M
