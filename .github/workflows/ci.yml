@@ -31,7 +31,7 @@ jobs:
         with:
           version: latest
           token: ${{ secrets.GITHUB_TOKEN }}
-          args: --check .
+          args: --check lua tests
 
       - name: Run headless tests
         run: nvim --headless -u tests/minimal_init.lua -c "lua require('tests.run').run()" -c "qa!"
