@@ -1,6 +1,6 @@
-local cli = require("jj-waltz.cli")
-local config = require("jj-waltz.config")
-local util = require("jj-waltz.util")
+local cli = require('jj-waltz.cli')
+local config = require('jj-waltz.config')
+local util = require('jj-waltz.util')
 
 local M = {}
 
@@ -15,24 +15,24 @@ local function show_error(err)
 
   notify(err.message, vim.log.levels.ERROR)
 
-  if err.kind == "link_conflict" then
+  if err.kind == 'link_conflict' then
     vim.ui.select({
-      { label = "Repair links", action = "repair" },
-      { label = "Apply links", action = "apply" },
-      { label = "Dismiss", action = "dismiss" },
+      { label = 'Repair links', action = 'repair' },
+      { label = 'Apply links', action = 'apply' },
+      { label = 'Dismiss', action = 'dismiss' },
     }, {
-      prompt = "Workspace links need attention",
+      prompt = 'Workspace links need attention',
       format_item = function(item)
         return item.label
       end,
     }, function(choice)
-      if not choice or choice.action == "dismiss" then
+      if not choice or choice.action == 'dismiss' then
         return
       end
 
-      if choice.action == "repair" then
+      if choice.action == 'repair' then
         M.links_repair()
-      elseif choice.action == "apply" then
+      elseif choice.action == 'apply' then
         M.links_apply()
       end
     end)
@@ -47,7 +47,7 @@ local function capture_buffer_state()
 end
 
 local function resolve_current_root()
-  local root, err = cli.run({ "root" }, { context = { kind = "root" } })
+  local root, err = cli.run({ 'root' }, { context = { kind = 'root' } })
   if not root then
     return nil, err
   end
@@ -55,17 +55,20 @@ local function resolve_current_root()
 end
 
 local function maybe_reopen_buffer(buffer_state, old_root, new_root)
-  if not buffer_state.path or buffer_state.path == "" then
+  if not buffer_state.path or buffer_state.path == '' then
     return false
   end
 
   if buffer_state.modified then
-    notify("Skipped reopening the current buffer because it has unsaved changes.", vim.log.levels.WARN)
+    notify(
+      'Skipped reopening the current buffer because it has unsaved changes.',
+      vim.log.levels.WARN
+    )
     return false
   end
 
   local relative = util.relative_to(buffer_state.path, old_root)
-  if relative == nil or relative == "" then
+  if relative == nil or relative == '' then
     return false
   end
 
@@ -79,9 +82,9 @@ local function maybe_reopen_buffer(buffer_state, old_root, new_root)
 end
 
 local function retarget_editor(destination, old_root, buffer_state)
-  local target_root, err = cli.run({ "root" }, {
+  local target_root, err = cli.run({ 'root' }, {
     cwd = destination,
-    context = { kind = "root" },
+    context = { kind = 'root' },
   })
   if not target_root then
     return nil, err
@@ -102,7 +105,7 @@ local function run_simple(args, opts)
 end
 
 function M.current()
-  local output = run_simple({ "current" }, { context = { kind = "current" } })
+  local output = run_simple({ 'current' }, { context = { kind = 'current' } })
   if output then
     notify(output)
   end
@@ -110,7 +113,7 @@ function M.current()
 end
 
 function M.root()
-  local output = run_simple({ "root" }, { context = { kind = "root" } })
+  local output = run_simple({ 'root' }, { context = { kind = 'root' } })
   if output then
     notify(output)
   end
@@ -118,7 +121,7 @@ function M.root()
 end
 
 function M.path(name)
-  local output = run_simple({ "path", name }, { context = { kind = "path" } })
+  local output = run_simple({ 'path', name }, { context = { kind = 'path' } })
   if output then
     notify(output)
   end
@@ -126,7 +129,8 @@ function M.path(name)
 end
 
 function M.remove(name, keep_dir)
-  local output = run_simple(cli.build_remove_args(name, keep_dir), { context = { kind = "remove" } })
+  local output =
+    run_simple(cli.build_remove_args(name, keep_dir), { context = { kind = 'remove' } })
   if output then
     notify(output)
   end
@@ -134,7 +138,7 @@ function M.remove(name, keep_dir)
 end
 
 function M.prune()
-  local output = run_simple({ "prune" }, { context = { kind = "prune" } })
+  local output = run_simple({ 'prune' }, { context = { kind = 'prune' } })
   if output then
     notify(output)
   end
@@ -148,7 +152,7 @@ function M.links_apply()
     return nil, err
   end
 
-  local output = run_simple({ "links", "apply" }, { context = { kind = "links" } })
+  local output = run_simple({ 'links', 'apply' }, { context = { kind = 'links' } })
   if output then
     notify(output)
   end
@@ -162,7 +166,7 @@ function M.links_repair()
     return nil, err
   end
 
-  local output = run_simple({ "links", "repair" }, { context = { kind = "links" } })
+  local output = run_simple({ 'links', 'repair' }, { context = { kind = 'links' } })
   if output then
     notify(output)
   end
@@ -185,27 +189,31 @@ function M.switch(name, opts)
   end
 
   local buffer_state = capture_buffer_state()
-  local destination, switch_err = cli.run(cli.build_switch_args(name, {
-    at = opts.at,
-    bookmark = opts.bookmark,
-    no_links = opts.no_links,
-    print_path = true,
-  }), {
-    context = { kind = "switch" },
-  })
+  local destination, switch_err = cli.run(
+    cli.build_switch_args(name, {
+      at = opts.at,
+      bookmark = opts.bookmark,
+      no_links = opts.no_links,
+      print_path = true,
+    }),
+    {
+      context = { kind = 'switch' },
+    }
+  )
 
   if not destination then
     show_error(switch_err)
     return nil, switch_err
   end
 
-  local target_root, retarget_err = retarget_editor(util.normalize(destination), old_root, buffer_state)
+  local target_root, retarget_err =
+    retarget_editor(util.normalize(destination), old_root, buffer_state)
   if not target_root then
     show_error(retarget_err)
     return nil, retarget_err
   end
 
-  notify(("Switched to %s\n%s"):format(name, destination))
+  notify(('Switched to %s\n%s'):format(name, destination))
   return {
     destination = util.normalize(destination),
     root = target_root,
@@ -213,17 +221,17 @@ function M.switch(name, opts)
 end
 
 local function prompt_new_workspace()
-  vim.ui.input({ prompt = "Workspace name: " }, function(name)
-    name = util.trim(name or "")
-    if name == "" then
+  vim.ui.input({ prompt = 'Workspace name: ' }, function(name)
+    name = util.trim(name or '')
+    if name == '' then
       return
     end
 
-    vim.ui.input({ prompt = "Revision for --at (optional): " }, function(revision)
-      vim.ui.input({ prompt = "Bookmark for --bookmark (optional): " }, function(bookmark)
+    vim.ui.input({ prompt = 'Revision for --at (optional): ' }, function(revision)
+      vim.ui.input({ prompt = 'Bookmark for --bookmark (optional): ' }, function(bookmark)
         M.switch(name, {
-          at = util.trim(revision or ""),
-          bookmark = util.trim(bookmark or ""),
+          at = util.trim(revision or ''),
+          bookmark = util.trim(bookmark or ''),
         })
       end)
     end)
@@ -231,7 +239,7 @@ local function prompt_new_workspace()
 end
 
 function M.pick()
-  local output, err = cli.run({ "list" }, { context = { kind = "list" } })
+  local output, err = cli.run({ 'list' }, { context = { kind = 'list' } })
   if not output then
     show_error(err)
     return nil, err
@@ -239,28 +247,28 @@ function M.pick()
 
   local entries = cli.parse_workspace_list(output)
   local items = {
-    { kind = "quick", target = "@", label = "@ current workspace" },
-    { kind = "quick", target = "-", label = "- previous workspace" },
-    { kind = "quick", target = "^", label = "^ default workspace" },
-    { kind = "quick", target = "default", label = "default workspace token" },
+    { kind = 'quick', target = '@', label = '@ current workspace' },
+    { kind = 'quick', target = '-', label = '- previous workspace' },
+    { kind = 'quick', target = '^', label = '^ default workspace' },
+    { kind = 'quick', target = 'default', label = 'default workspace token' },
   }
 
   for _, entry in ipairs(entries) do
-    local prefix = entry.marker ~= " " and (entry.marker .. " ") or "  "
+    local prefix = entry.marker ~= ' ' and (entry.marker .. ' ') or '  '
     table.insert(items, {
-      kind = "workspace",
+      kind = 'workspace',
       target = entry.name,
-      label = ("%s%s  %s"):format(prefix, entry.name, entry.path),
+      label = ('%s%s  %s'):format(prefix, entry.name, entry.path),
     })
   end
 
   table.insert(items, {
-    kind = "new",
-    label = "+ create or switch workspace...",
+    kind = 'new',
+    label = '+ create or switch workspace...',
   })
 
   vim.ui.select(items, {
-    prompt = "jj-waltz workspaces",
+    prompt = 'jj-waltz workspaces',
     format_item = function(item)
       return item.label
     end,
@@ -269,7 +277,7 @@ function M.pick()
       return
     end
 
-    if choice.kind == "new" then
+    if choice.kind == 'new' then
       prompt_new_workspace()
       return
     end

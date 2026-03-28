@@ -1,6 +1,6 @@
-local actions = require("jj-waltz.actions")
-local commands = require("jj-waltz.commands")
-local config = require("jj-waltz.config")
+local actions = require('jj-waltz.actions')
+local commands = require('jj-waltz.commands')
+local config = require('jj-waltz.config')
 
 local M = {}
 
@@ -9,9 +9,9 @@ local function setup_keymaps(opts)
     return
   end
 
-  vim.keymap.set("n", "<leader>jw", function()
+  vim.keymap.set('n', '<leader>jw', function()
     actions.pick()
-  end, { desc = "jj-waltz picker" })
+  end, { desc = 'jj-waltz picker' })
 end
 
 function M.setup(opts)

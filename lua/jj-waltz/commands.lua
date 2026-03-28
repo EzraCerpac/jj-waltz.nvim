@@ -1,4 +1,4 @@
-local actions = require("jj-waltz.actions")
+local actions = require('jj-waltz.actions')
 
 local M = {}
 
@@ -17,75 +17,75 @@ function M.register()
     return
   end
 
-  register("JwPick", {
-    desc = "Pick a jj-waltz workspace",
+  register('JwPick', {
+    desc = 'Pick a jj-waltz workspace',
     callback = function()
       actions.pick()
     end,
   })
 
-  register("JwSwitch", {
+  register('JwSwitch', {
     nargs = 1,
-    desc = "Switch to a jj-waltz workspace",
+    desc = 'Switch to a jj-waltz workspace',
     callback = function(params)
       actions.switch(params.args)
     end,
   })
 
-  register("JwCurrent", {
-    desc = "Show the current jj-waltz workspace",
+  register('JwCurrent', {
+    desc = 'Show the current jj-waltz workspace',
     callback = function()
       actions.current()
     end,
   })
 
-  register("JwRoot", {
-    desc = "Show the current jj-waltz workspace root",
+  register('JwRoot', {
+    desc = 'Show the current jj-waltz workspace root',
     callback = function()
       actions.root()
     end,
   })
 
-  register("JwPath", {
+  register('JwPath', {
     nargs = 1,
-    desc = "Show the path for a jj-waltz workspace",
+    desc = 'Show the path for a jj-waltz workspace',
     callback = function(params)
       actions.path(params.args)
     end,
   })
 
-  register("JwRemove", {
-    nargs = "?",
-    desc = "Forget a jj-waltz workspace",
+  register('JwRemove', {
+    nargs = '?',
+    desc = 'Forget a jj-waltz workspace',
     callback = function(params)
-      actions.remove(params.args ~= "" and params.args or nil, false)
+      actions.remove(params.args ~= '' and params.args or nil, false)
     end,
   })
 
-  register("JwRemoveKeepDir", {
-    nargs = "?",
-    desc = "Forget a jj-waltz workspace but keep its directory",
+  register('JwRemoveKeepDir', {
+    nargs = '?',
+    desc = 'Forget a jj-waltz workspace but keep its directory',
     callback = function(params)
-      actions.remove(params.args ~= "" and params.args or nil, true)
+      actions.remove(params.args ~= '' and params.args or nil, true)
     end,
   })
 
-  register("JwPrune", {
-    desc = "Forget missing jj-waltz workspaces",
+  register('JwPrune', {
+    desc = 'Forget missing jj-waltz workspaces',
     callback = function()
       actions.prune()
     end,
   })
 
-  register("JwLinksApply", {
-    desc = "Apply jj-waltz workspace links",
+  register('JwLinksApply', {
+    desc = 'Apply jj-waltz workspace links',
     callback = function()
       actions.links_apply()
     end,
   })
 
-  register("JwLinksRepair", {
-    desc = "Repair jj-waltz workspace links",
+  register('JwLinksRepair', {
+    desc = 'Repair jj-waltz workspace links',
     callback = function()
       actions.links_repair()
     end,
