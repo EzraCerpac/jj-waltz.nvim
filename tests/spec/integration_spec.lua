@@ -70,7 +70,7 @@ function M.test_switch_retargets_cwd_and_reopens_current_buffer()
   )
 end
 
-function M.test_switch_falls_back_to_workspace_root_when_subdir_missing()
+function M.test_switch_opens_empty_tab_when_matching_file_and_subdir_are_missing()
   local root = support.tempdir()
   local mock = support.mock_jw(root, {
     with_subdir = false,
@@ -83,13 +83,19 @@ function M.test_switch_falls_back_to_workspace_root_when_subdir_missing()
   setup_plugin(mock.command)
   vim.cmd.cd(vim.fn.fnameescape(support.join(mock.root, 'docs')))
   vim.cmd.edit(vim.fn.fnameescape(support.join(mock.root, 'docs', 'note.txt')))
+  local original_tab = vim.api.nvim_get_current_tabpage()
+  local original_buffer = vim.api.nvim_get_current_buf()
 
   with_notify_capture(function()
     vim.cmd('JwSwitch feature-a')
   end)
 
   support.assert_path_eq(vim.fn.getcwd(), mock.feature_root)
-  support.assert_path_eq(vim.api.nvim_buf_get_name(0), support.join(mock.root, 'docs', 'note.txt'))
+  support.assert_eq(vim.api.nvim_buf_get_name(0), '')
+  support.assert_eq(
+    vim.api.nvim_win_get_buf(vim.api.nvim_tabpage_get_win(original_tab)),
+    original_buffer
+  )
 end
 
 function M.test_picker_selection_uses_switch_flow()

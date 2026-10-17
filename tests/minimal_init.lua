@@ -2,6 +2,7 @@ local cwd = vim.fn.getcwd()
 
 vim.opt.runtimepath:prepend(cwd)
 package.path = table.concat({
+  cwd .. '/?.lua',
   cwd .. '/lua/?.lua',
   cwd .. '/lua/?/init.lua',
   cwd .. '/tests/?.lua',

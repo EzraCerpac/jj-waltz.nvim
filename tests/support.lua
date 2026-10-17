@@ -227,6 +227,9 @@ function M.assert_truthy(value, message)
 end
 
 function M.reset_state()
+  -- Each headless case owns its editor state, including deliberately dirty buffers.
+  vim.cmd('silent! tabonly!')
+  vim.cmd('silent! %bwipeout!')
   require('jj-waltz.config').reset()
   require('jj-waltz.cli').clear_cache()
 end
