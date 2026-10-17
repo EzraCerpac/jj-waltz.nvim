@@ -1,5 +1,6 @@
 local cli = require('jj-waltz.cli')
 local config = require('jj-waltz.config')
+local context = require('jj-waltz.context')
 local util = require('jj-waltz.util')
 
 local M = {}
@@ -39,46 +40,12 @@ local function show_error(err)
   end
 end
 
-local function capture_buffer_state()
-  return {
-    path = util.normalize(vim.api.nvim_buf_get_name(0)),
-    modified = vim.bo.modified,
-  }
-end
-
 local function resolve_current_root()
   local root, err = cli.run({ 'root' }, { context = { kind = 'root' } })
   if not root then
     return nil, err
   end
   return util.normalize(root)
-end
-
-local function maybe_reopen_buffer(buffer_state, old_root, new_root)
-  if not buffer_state.path or buffer_state.path == '' then
-    return false
-  end
-
-  if buffer_state.modified then
-    notify(
-      'Skipped reopening the current buffer because it has unsaved changes.',
-      vim.log.levels.WARN
-    )
-    return false
-  end
-
-  local relative = util.relative_to(buffer_state.path, old_root)
-  if relative == nil or relative == '' then
-    return false
-  end
-
-  local candidate = util.join(new_root, relative)
-  if not util.exists(candidate) then
-    return false
-  end
-
-  vim.cmd.edit(vim.fn.fnameescape(candidate))
-  return true
 end
 
 local function retarget_editor(destination, old_root, buffer_state)
@@ -90,8 +57,17 @@ local function retarget_editor(destination, old_root, buffer_state)
     return nil, err
   end
 
-  vim.cmd.cd(vim.fn.fnameescape(destination))
-  maybe_reopen_buffer(buffer_state, old_root, util.normalize(target_root))
+  local ok, message = pcall(context.activate, buffer_state, old_root, target_root, destination)
+  if not ok then
+    -- Keep all buffers/tabs intact, including any opened by user autocommands.
+    if vim.api.nvim_tabpage_is_valid(buffer_state.tab) then
+      vim.api.nvim_set_current_tabpage(buffer_state.tab)
+    end
+    return nil, { kind = 'editor_context', message = tostring(message) }
+  end
+  if message then
+    notify(message, vim.log.levels.WARN)
+  end
   return util.normalize(target_root)
 end
 
@@ -188,7 +164,7 @@ function M.switch(name, opts)
     return nil, cap_err
   end
 
-  local buffer_state = capture_buffer_state()
+  local buffer_state = context.capture()
   local destination, switch_err = cli.run(
     cli.build_switch_args(name, {
       at = opts.at,

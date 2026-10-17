@@ -16,8 +16,28 @@ jj-waltz.nvim wraps the `jw` CLI from jj-waltz and exposes workspace actions
 inside Neovim without extra runtime dependencies.
 
 The plugin uses `jw switch --print-path` to mirror shell-driven switch
-behavior. On a successful switch it changes Neovim's cwd to the target path and
-tries to reopen the current buffer in the destination workspace.
+behavior. Switching adopts the starting tab and keeps a tab per visited
+workspace root. Returning restores its splits, active window, cursor positions
+and views. A first visit opens one window and maps the current clean file by
+relative path, with the cursor clamped to fit the destination file.
+
+Modified buffers stay in their original tab. Missing counterparts, unnamed or
+special buffers, and files outside the source root start an empty tab instead.
+Switching never forces a write, reload, rename or buffer deletion.
+
+New workspace tabs use |:tcd| with the CLI destination, including its subdirectory
+fallback. Existing tabs keep their cwd scopes (including |:lcd|); global cwd and
+unrelated tabs are unchanged. A restored tab's cwd may differ from the CLI
+destination. Commands use the active window's effective cwd.
+
+Tabs are keyed by resolved root path, not workspace name or token. Renaming at
+the same path reuses a tab; moving a workspace opens a new one. Removing a
+workspace leaves its tab and buffers available for recovery; a failed switch
+keeps the current tab. Reusing a root path reuses its tab. Closing a tab forgets
+its context; switching back creates a fresh one. Context is session-local.
+If a tab's active cwd no longer resolves to its associated workspace, the tab
+is left intact and detached; switching back creates a fresh tab with the
+correct workspace cwd.
 
 ==============================================================================
 REQUIREMENTS                                             *jj-waltz-requirements*
@@ -64,7 +84,7 @@ COMMANDS                                                   *jj-waltz-commands*
   Open the workspace picker.
 
 :JwSwitch {name}
-  Switch to or create a workspace and retarget Neovim to the resulting path.
+  Switch to or create a workspace and activate its editor tab.
 
 :JwCurrent
   Show the current workspace name.

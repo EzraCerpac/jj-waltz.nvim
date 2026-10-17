@@ -15,7 +15,7 @@ In practice, use `jj-waltz` `>= 0.1.5` or a build from the current `jj-waltz` re
 ## Features
 
 - `:JwPick` workspace picker using `vim.ui.select`
-- `:JwSwitch {name}` with editor retargeting via `jw switch --print-path`
+- `:JwSwitch {name}` with a tab per workspace via `jw switch --print-path`
 - `:JwCurrent`, `:JwRoot`, `:JwPath {name}`
 - `:JwRemove [name]`, `:JwRemoveKeepDir [name]`, `:JwPrune`
 - `:JwLinksApply`, `:JwLinksRepair`
@@ -95,8 +95,11 @@ require("jj-waltz").setup({
 ## Behavior Notes
 
 - The plugin shells out to `jw`. It does not call Rust internals directly.
-- Switching is editor-aware: it uses `jw switch --print-path`, changes Neovim into the destination directory, and reopens the current buffer in the target workspace when the matching file exists.
-- If the current buffer has unsaved changes, the plugin changes cwd but skips reopening that buffer.
+- Switching adopts the starting tab and keeps one tab per visited workspace root. Returning restores that tab's windows, splits, active window, cursor positions, and views. First visits start with one window, opening the current clean file at the same relative path when it exists (with the cursor clamped to fit).
+- Modified buffers stay in their original workspace tab. Missing counterparts, unnamed buffers, special buffers, and files outside the source workspace start an empty destination tab. Switching never forces a write, reload, rename, or buffer deletion.
+- New workspace tabs use `:tcd` with the destination from `jw` (including its subdirectory fallback). Existing tabs retain their cwd scopes, including `:lcd`; the global cwd and unrelated tabs are untouched. A restored tab's cwd can therefore differ from the CLI's destination. CLI actions use the active window's effective cwd.
+- Tabs are associated by resolved root path, not workspace name or token. Renames at the same path reuse a tab; moved workspaces get a new tab. Removed workspaces leave their tabs and buffers available for recovery; a failed switch keeps the current tab. Reusing a root path reuses its tab. Closing a tab forgets that context; switching back creates a fresh one. Context lasts for the current Neovim session.
+- If a tab's active cwd no longer resolves to its associated workspace (for example after a manual `:tcd` into another workspace), it is left intact and detached from that association. Switching back creates a fresh tab with the correct workspace cwd.
 - Link conflicts surface as actionable Neovim prompts that can run `:JwLinksRepair` or `:JwLinksApply`.
 
 ## Commands

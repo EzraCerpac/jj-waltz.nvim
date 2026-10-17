@@ -3,6 +3,7 @@ local M = {}
 local modules = {
   'tests.spec.cli_spec',
   'tests.spec.integration_spec',
+  'tests.spec.context_spec',
 }
 
 local function test_functions(module)
@@ -39,7 +40,7 @@ function M.run()
     for _, failure in ipairs(failures) do
       vim.api.nvim_err_writeln(('%s :: %s\n%s'):format(failure.module, failure.test, failure.error))
     end
-    vim.cmd.cquit(1)
+    vim.cmd('cquit 1')
     return
   end
 
